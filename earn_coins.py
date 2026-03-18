@@ -212,16 +212,12 @@ def monetag_video_ad_html() -> str:
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════
-     MONETAG ONCLICK script — loads silently.
-     It attaches to document clicks, so the NEXT
-     real user click (on #openAdBtn) fires the ad.
-══════════════════════════════════════════════ -->
-<script>(function(s){s.dataset.zone='10745571',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<!-- ── Direct Ad Link ── -->
+<!-- No external scripts needed — button opens the ad URL directly in a new tab -->
 
 <!-- ── PHASE 1: Click button ── -->
 <div id="phase1">
-  <div class="pre-badge">🎬 &nbsp; Monetag Ad Ready</div>
+  <div class="pre-badge">🎬 &nbsp; Ad Ready</div>
   <div class="coin-icon">🪙</div>
   <div class="pre-title">One click away from coins!</div>
   <div class="pre-sub">
@@ -229,7 +225,7 @@ def monetag_video_ad_html() -> str:
     Coins are added automatically after 30 seconds.
   </div>
 
-  <!-- THIS button click = Monetag onclick fires the real ad -->
+  <!-- Opens direct ad link in new tab, then starts countdown -->
   <button id="openAdBtn" onclick="startAd()">
     ▶ &nbsp; OPEN AD &amp; START EARNING
   </button>
@@ -265,11 +261,15 @@ def monetag_video_ad_html() -> str:
 </div>
 
 <script>
-  const TOTAL = 30;
-  const CIRC  = 2 * Math.PI * 50; // ≈ 314.16
+  const AD_URL = 'https://omg10.com/4/10745799';
+  const TOTAL  = 30;
+  const CIRC   = 2 * Math.PI * 50;
 
   function startAd() {
-    // Swap phases
+    // Open the direct ad link in a new tab
+    window.open(AD_URL, '_blank');
+
+    // Switch to phase 2 (countdown)
     document.getElementById('phase1').style.display = 'none';
     document.getElementById('phase2').style.display = 'block';
 
@@ -294,7 +294,7 @@ def monetag_video_ad_html() -> str:
         document.getElementById('cd-label').textContent = 'complete!';
         document.getElementById('cd-sub').textContent   = 'Ad done! Coins are being added to your wallet…';
         document.getElementById('chip').innerHTML        = '🎉 &nbsp; Coins added!';
-        document.getElementById('chip').style.background = 'rgba(48,232,155,0.2)';
+        document.getElementById('chip').style.background  = 'rgba(48,232,155,0.2)';
         document.getElementById('chip').style.borderColor = 'rgba(48,232,155,0.5)';
       }
     }, 1000);
