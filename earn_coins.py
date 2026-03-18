@@ -89,123 +89,216 @@ div[data-testid="stAlert"] {
 """, unsafe_allow_html=True)
 
 
-# ─── Monetag Video Ad HTML Component ──────────────────────────────────────────
+# ─── Monetag Ad HTML Component ─────────────────────────────────────────────────
 def monetag_video_ad_html() -> str:
     """
-    Embeds inside st.components.v1.html().
-    - Fires Monetag's interstitial/video ad script on load (real ad pops up)
-    - Shows a branded countdown ring overlay inside the component frame
+    TWO-PHASE component:
+    PHASE 1 — Big glowing "Open Ad" button. Monetag script is already loaded,
+               so when the user clicks the button, Monetag Onclick intercepts
+               that real click and opens the popunder. Our JS then switches to Phase 2.
+    PHASE 2 — Countdown ring runs 30s. After 0s shows "Done" message.
     """
-    return f"""<!DOCTYPE html>
+    return """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&display=swap');
-  * {{ margin:0; padding:0; box-sizing:border-box; }}
-  body {{
+  *  { margin:0; padding:0; box-sizing:border-box; }
+  body {
     background:#090b10;
     display:flex; align-items:center; justify-content:center;
-    min-height:100vh; font-family:'Rajdhani',sans-serif; overflow:hidden;
-  }}
-  .overlay {{
-    background:linear-gradient(135deg,#12161f 0%,#0e1118 100%);
-    border:2px solid #f5c842; border-radius:20px;
-    padding:28px 22px; text-align:center; width:90%; max-width:360px;
-    animation:pulse 2s ease-in-out infinite;
-  }}
-  @keyframes pulse {{
-    0%,100% {{ box-shadow:0 0 40px rgba(245,200,66,0.15); border-color:#f5c842; }}
-    50%      {{ box-shadow:0 0 80px rgba(245,200,66,0.4);  border-color:#ffe680; }}
-  }}
-  .badge {{
-    display:inline-block; background:rgba(245,200,66,0.12);
-    border:1px solid rgba(245,200,66,0.3); color:#f5c842;
+    min-height:360px; font-family:'Rajdhani',sans-serif;
+  }
+
+  /* ── PHASE 1: Click to open ad ── */
+  #phase1 {
+    text-align:center; padding:28px 22px; width:90%; max-width:380px;
+  }
+  .pre-badge {
+    font-size:0.65rem; letter-spacing:0.25em; color:#6b7591;
+    text-transform:uppercase; font-family:'Orbitron',monospace;
+    margin-bottom:18px;
+  }
+  .coin-icon {
+    font-size:52px; line-height:1; margin-bottom:16px;
+    filter: drop-shadow(0 0 18px rgba(245,200,66,0.7));
+    animation: iconBob 2s ease-in-out infinite;
+  }
+  @keyframes iconBob {
+    0%,100% { transform:translateY(0); }
+    50%      { transform:translateY(-6px); }
+  }
+  .pre-title {
+    font-family:'Orbitron',monospace; font-size:1rem;
+    font-weight:900; color:#e8eaf0; margin-bottom:6px;
+  }
+  .pre-sub {
+    font-size:0.82rem; color:#6b7591; margin-bottom:24px; line-height:1.5;
+  }
+  /* The big glowing click button — Monetag intercepts this click */
+  #openAdBtn {
+    display:block; width:100%;
+    padding:16px 20px;
+    background:linear-gradient(135deg,#f5c842,#c99a1a);
+    color:#080a0f;
+    font-family:'Orbitron',monospace;
+    font-size:0.92rem; font-weight:900;
+    letter-spacing:0.12em;
+    border:none; border-radius:50px;
+    cursor:pointer;
+    box-shadow:0 4px 28px rgba(245,200,66,0.45);
+    animation:btnPulse 1.8s ease-in-out infinite;
+    transition:transform 0.15s;
+  }
+  #openAdBtn:hover  { transform:scale(1.03); }
+  #openAdBtn:active { transform:scale(0.97); }
+  @keyframes btnPulse {
+    0%,100% { box-shadow:0 4px 28px rgba(245,200,66,0.4); }
+    50%      { box-shadow:0 4px 52px rgba(245,200,66,0.75); }
+  }
+  .reward-preview {
+    margin-top:16px;
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(48,232,155,0.08);
+    border:1px solid rgba(48,232,155,0.2);
+    border-radius:50px; padding:8px 20px;
+    font-family:'Orbitron',monospace;
+    color:#30e89b; font-size:0.82rem; font-weight:700;
+  }
+
+  /* ── PHASE 2: Countdown ── */
+  #phase2 {
+    display:none; text-align:center;
+    padding:28px 22px; width:90%; max-width:380px;
+  }
+  .badge2 {
+    display:inline-block; background:rgba(245,200,66,0.1);
+    border:1px solid rgba(245,200,66,0.25); color:#f5c842;
     font-size:0.62rem; letter-spacing:0.22em; text-transform:uppercase;
     padding:4px 14px; border-radius:50px; margin-bottom:18px;
     font-family:'Orbitron',monospace;
-  }}
-  .ring-wrap {{ position:relative; width:110px; height:110px; margin:0 auto 16px; }}
-  .ring-wrap svg {{ transform:rotate(-90deg); }}
-  .ring-bg {{ fill:none; stroke:#1e2535; stroke-width:8; }}
-  .ring-fg {{
+  }
+  .ring-wrap { position:relative; width:120px; height:120px; margin:0 auto 18px; }
+  .ring-wrap svg { transform:rotate(-90deg); }
+  .ring-bg { fill:none; stroke:#1e2535; stroke-width:8; }
+  .ring-fg {
     fill:none; stroke:url(#grad); stroke-width:8; stroke-linecap:round;
-    stroke-dasharray:314.16; stroke-dashoffset:0; transition:stroke-dashoffset 1s linear;
-  }}
-  .ring-inner {{
+    stroke-dasharray:314.16; stroke-dashoffset:0;
+    transition:stroke-dashoffset 1s linear;
+  }
+  .ring-inner {
     position:absolute; inset:0; display:flex;
     flex-direction:column; align-items:center; justify-content:center;
-  }}
-  .ring-num {{
-    font-family:'Orbitron',monospace; font-size:1.7rem;
+  }
+  .ring-num {
+    font-family:'Orbitron',monospace; font-size:2rem;
     font-weight:900; color:#f5c842; line-height:1;
-  }}
-  .ring-s {{ font-size:0.58rem; color:#6b7591; letter-spacing:0.14em; text-transform:uppercase; margin-top:2px; }}
-  .title {{ font-family:'Orbitron',monospace; font-size:0.85rem; font-weight:700; color:#e8eaf0; margin-bottom:5px; }}
-  .sub   {{ font-size:0.78rem; color:#6b7591; margin-bottom:16px; }}
-  .chip  {{
+    transition:color 0.3s;
+  }
+  .ring-s { font-size:0.58rem; color:#6b7591; letter-spacing:0.14em; text-transform:uppercase; margin-top:3px; }
+  .cd-title { font-family:'Orbitron',monospace; font-size:0.9rem; font-weight:700; color:#e8eaf0; margin-bottom:6px; }
+  .cd-sub   { font-size:0.8rem; color:#6b7591; margin-bottom:18px; line-height:1.5; }
+  .chip {
     display:inline-flex; align-items:center; gap:6px;
     background:rgba(48,232,155,0.1); border:1px solid rgba(48,232,155,0.25);
-    border-radius:50px; padding:7px 18px;
-    font-family:'Orbitron',monospace; color:#30e89b;
-    font-size:0.8rem; font-weight:700;
-  }}
-  .warn {{ margin-top:13px; font-size:0.68rem; color:#6b7591; }}
-  .warn span {{ color:#ff5c6a; }}
+    border-radius:50px; padding:8px 20px;
+    font-family:'Orbitron',monospace; color:#30e89b; font-size:0.82rem; font-weight:700;
+  }
+  .warn { margin-top:14px; font-size:0.68rem; color:#6b7591; }
+  .warn span { color:#ff5c6a; }
 </style>
 </head>
 <body>
 
-<!-- ╔══════════════════════════════════════════╗
-     ║   MONETAG ONCLICK (POPUNDER) — ZONE 10745571   ║
-     ╚══════════════════════════════════════════╝ -->
-<script>(function(s){{s.dataset.zone='10745571',s.src='https://al5sm.com/tag.min.js'}})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<!-- ══════════════════════════════════════════════
+     MONETAG ONCLICK script — loads silently.
+     It attaches to document clicks, so the NEXT
+     real user click (on #openAdBtn) fires the ad.
+══════════════════════════════════════════════ -->
+<script>(function(s){s.dataset.zone='10745571',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
-<!-- ═══ Countdown UI ═══ -->
-<div class="overlay">
-  <div class="badge">📺 &nbsp; Monetag Video Ad</div>
+<!-- ── PHASE 1: Click button ── -->
+<div id="phase1">
+  <div class="pre-badge">🎬 &nbsp; Monetag Ad Ready</div>
+  <div class="coin-icon">🪙</div>
+  <div class="pre-title">One click away from coins!</div>
+  <div class="pre-sub">
+    Click the button below to open the ad.<br/>
+    Coins are added automatically after 30 seconds.
+  </div>
+
+  <!-- THIS button click = Monetag onclick fires the real ad -->
+  <button id="openAdBtn" onclick="startAd()">
+    ▶ &nbsp; OPEN AD &amp; START EARNING
+  </button>
+
+  <div class="reward-preview">🪙 &nbsp; Reward unlocks after ad</div>
+</div>
+
+<!-- ── PHASE 2: Countdown ── -->
+<div id="phase2">
+  <div class="badge2">📺 &nbsp; Ad Opened — Timer Running</div>
 
   <div class="ring-wrap">
-    <svg width="110" height="110" viewBox="0 0 110 110">
+    <svg width="120" height="120" viewBox="0 0 120 120">
       <defs>
         <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%"   stop-color="#f5c842"/>
           <stop offset="100%" stop-color="#30e89b"/>
         </linearGradient>
       </defs>
-      <circle class="ring-bg" cx="55" cy="55" r="50"/>
-      <circle class="ring-fg" cx="55" cy="55" r="50" id="ring"/>
+      <circle class="ring-bg" cx="60" cy="60" r="50"/>
+      <circle class="ring-fg" cx="60" cy="60" r="50" id="ring"/>
     </svg>
     <div class="ring-inner">
       <div class="ring-num" id="cd">30</div>
-      <div class="ring-s">seconds</div>
+      <div class="ring-s" id="cd-label">seconds</div>
     </div>
   </div>
 
-  <div class="title">Ad is playing above</div>
-  <div class="sub">Watch the full ad to earn coins</div>
-  <div class="chip">🪙 &nbsp; Coins unlock at 0s</div>
-  <p class="warn"><span>⚠</span> Do not close or refresh the tab</p>
+  <div class="cd-title">Ad is playing in the new tab</div>
+  <div class="cd-sub" id="cd-sub">Watch the ad — coins arrive when timer hits 0</div>
+  <div class="chip" id="chip">🪙 &nbsp; Coins unlock at 0s</div>
+  <p class="warn"><span>⚠</span> Do not close or refresh this tab</p>
 </div>
 
 <script>
-  const TOTAL = 30, CIRC = 2 * Math.PI * 50;
-  const ring = document.getElementById('ring');
-  const cd   = document.getElementById('cd');
-  ring.style.strokeDasharray  = CIRC;
-  ring.style.strokeDashoffset = 0;
-  let left = TOTAL;
-  const t = setInterval(() => {{
-    left--;
-    cd.textContent = left > 0 ? left : '✓';
-    if (left <= 0) {{
-      cd.style.color = '#30e89b';
-      document.querySelector('.sub').textContent = 'Ad complete! Coins being added…';
-      clearInterval(t);
-    }}
-    ring.style.strokeDashoffset = CIRC * (1 - Math.max(left,0) / TOTAL);
-  }}, 1000);
+  const TOTAL = 30;
+  const CIRC  = 2 * Math.PI * 50; // ≈ 314.16
+
+  function startAd() {
+    // Swap phases
+    document.getElementById('phase1').style.display = 'none';
+    document.getElementById('phase2').style.display = 'block';
+
+    // Init ring
+    const ring = document.getElementById('ring');
+    const cd   = document.getElementById('cd');
+    ring.style.strokeDasharray  = CIRC;
+    ring.style.strokeDashoffset = 0;
+
+    let left = TOTAL;
+
+    const timer = setInterval(() => {
+      left--;
+      if (left > 0) {
+        cd.textContent = left;
+        ring.style.strokeDashoffset = CIRC * (1 - left / TOTAL);
+      } else {
+        clearInterval(timer);
+        ring.style.strokeDashoffset = CIRC;
+        cd.textContent  = '✓';
+        cd.style.color  = '#30e89b';
+        document.getElementById('cd-label').textContent = 'complete!';
+        document.getElementById('cd-sub').textContent   = 'Ad done! Coins are being added to your wallet…';
+        document.getElementById('chip').innerHTML        = '🎉 &nbsp; Coins added!';
+        document.getElementById('chip').style.background = 'rgba(48,232,155,0.2)';
+        document.getElementById('chip').style.borderColor = 'rgba(48,232,155,0.5)';
+      }
+    }, 1000);
+  }
 </script>
 </body>
 </html>"""
@@ -338,48 +431,32 @@ elif not st.session_state.watching:
 
 else:
     # ══════════════════════════════════════════════════
-    #  MONETAG VIDEO AD PLAYING
+    #  MONETAG AD — Phase 1: user clicks inside component
+    #               Phase 2: countdown runs in component
+    #  Python side: 35s timer then awards coins
     # ══════════════════════════════════════════════════
 
-    st.markdown("""
-    <div style="text-align:center;margin-bottom:8px;">
-      <span style="font-family:'Orbitron',monospace;font-size:0.72rem;
-        color:#f5c842;letter-spacing:0.2em;text-transform:uppercase;">
-        🔴 &nbsp; Monetag Video Ad Loading…
-      </span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Fire the real Monetag video interstitial + show countdown ring
+    # Show the two-phase component (click button → ad fires → countdown)
     components.html(
         monetag_video_ad_html(),
-        height=330,
+        height=430,
         scrolling=False,
     )
 
-    # Python-side progress bar (mirrors the 30s JS countdown)
-    st.markdown("""
-    <div style="margin-top:12px;margin-bottom:4px;text-align:center;
-      font-size:0.7rem;color:#6b7591;letter-spacing:0.14em;text-transform:uppercase;">
-      Server-side verification timer
-    </div>
-    """, unsafe_allow_html=True)
-
-    bar    = st.progress(0)
-    slot   = st.empty()
-    SECS   = 30
+    # Python-side server timer (gives a few extra seconds buffer)
+    bar  = st.progress(0)
+    slot = st.empty()
+    SECS = 33
 
     for i in range(SECS + 1):
         left = SECS - i
-        bar.progress(i / SECS, text=f"⏳  {left}s remaining")
+        bar.progress(i / SECS, text=f"⏳  Verifying ad… {left}s")
         slot.markdown(f"""
-        <div style="text-align:center;padding:6px 0;">
-          <span style="font-family:'Orbitron',monospace;font-size:0.95rem;
+        <div style="text-align:center;padding:4px 0;">
+          <span style="font-family:'Orbitron',monospace;font-size:0.88rem;
             color:#{'30e89b' if left == 0 else 'f5c842'};font-weight:700;">
-            {'✓  Ad Complete!' if left == 0 else f'{left}s'}
+            {'✓  Verified! Adding coins…' if left == 0 else ''}
           </span>
-          {"" if left == 0 else
-           f'<span style="color:#6b7591;font-size:0.78rem;margin-left:8px;">until coins arrive</span>'}
         </div>
         """, unsafe_allow_html=True)
         time.sleep(1)
