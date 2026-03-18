@@ -284,7 +284,7 @@ if st.session_state.history:
 st.markdown("---")
 st.markdown("""
 <div style="text-align:center;">
-  <a href="http://localhost:5500/index.html" target="_blank"
+  <a href="https://bodare207-ai.github.io/index.html/" target="_blank"
     style="display:inline-block; padding:12px 32px; border-radius:50px;
     border:1px solid #1e2535; color:#6b7591; text-decoration:none;
     font-family:'Rajdhani',sans-serif; font-size:0.9rem; letter-spacing:0.1em;
