@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import time
 import random
 
@@ -10,23 +11,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# ─── Monetag Zone ──────────────────────────────────────────────────────────────
+# Zone ID: 10745571  |  Format: Onclick (Popunder)  |  Script: al5sm.com
+
 # ─── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 
-/* ── Root ── */
 :root {
-  --gold: #f5c842;
-  --gold-dark: #c99a1a;
-  --bg: #090b10;
-  --card: #12161f;
-  --border: #1e2535;
-  --text: #e8eaf0;
-  --muted: #6b7591;
-  --green: #30e89b;
-  --purple: #9b6dff;
-  --red: #ff5c6a;
+  --gold: #f5c842; --gold-dark: #c99a1a;
+  --bg: #090b10; --card: #12161f; --border: #1e2535;
+  --text: #e8eaf0; --muted: #6b7591;
+  --green: #30e89b; --purple: #9b6dff; --red: #ff5c6a;
 }
 
 html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
@@ -34,265 +31,435 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
   color: #e8eaf0 !important;
   font-family: 'Rajdhani', sans-serif !important;
 }
-
 [data-testid="stAppViewContainer"] {
   background-image:
     linear-gradient(rgba(245,200,66,0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(245,200,66,0.03) 1px, transparent 1px);
   background-size: 60px 60px;
 }
-
 [data-testid="stHeader"] { background: transparent !important; }
-
-/* Hide streamlit default elements */
 #MainMenu, footer, [data-testid="stToolbar"] { visibility: hidden; }
 
-/* Buttons */
 div.stButton > button {
   background: linear-gradient(135deg, #f5c842, #c99a1a) !important;
-  color: #080a0f !important;
-  border: none !important;
+  color: #080a0f !important; border: none !important;
   border-radius: 50px !important;
   font-family: 'Orbitron', monospace !important;
-  font-size: 0.85rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.1em !important;
-  padding: 0.7rem 2rem !important;
-  transition: all 0.2s !important;
-  box-shadow: 0 4px 20px rgba(245,200,66,0.25) !important;
-  width: 100% !important;
+  font-size: 0.9rem !important; font-weight: 700 !important;
+  letter-spacing: 0.12em !important; padding: 0.85rem 2rem !important;
+  box-shadow: 0 4px 24px rgba(245,200,66,0.3) !important;
+  width: 100% !important; transition: all 0.2s !important;
 }
 div.stButton > button:hover {
-  box-shadow: 0 4px 40px rgba(245,200,66,0.5) !important;
-  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 48px rgba(245,200,66,0.55) !important;
+  transform: translateY(-3px) !important;
 }
 div.stButton > button:disabled {
-  background: #1e2535 !important;
-  color: #6b7591 !important;
-  box-shadow: none !important;
-  transform: none !important;
+  background: #1e2535 !important; color: #6b7591 !important;
+  box-shadow: none !important; transform: none !important;
 }
 
-/* Progress bar */
 div[data-testid="stProgress"] > div > div {
   background: linear-gradient(90deg, #f5c842, #30e89b) !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
 }
 div[data-testid="stProgress"] > div {
-  background: #1e2535 !important;
-  border-radius: 4px !important;
+  background: #1e2535 !important; border-radius: 6px !important; height: 10px !important;
 }
 
-/* Metric */
 div[data-testid="stMetric"] {
-  background: #12161f !important;
-  border: 1px solid #1e2535 !important;
-  border-radius: 16px !important;
-  padding: 20px !important;
+  background: #12161f !important; border: 1px solid #1e2535 !important;
+  border-radius: 16px !important; padding: 20px !important;
 }
-div[data-testid="stMetricLabel"] p { color: #6b7591 !important; font-size: 0.8rem !important; letter-spacing: 0.1em; }
-div[data-testid="stMetricValue"] { color: #f5c842 !important; font-family: 'Orbitron', monospace !important; }
+div[data-testid="stMetricLabel"] p {
+  color: #6b7591 !important; font-size: 0.75rem !important;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+div[data-testid="stMetricValue"] {
+  color: #f5c842 !important; font-family: 'Orbitron', monospace !important;
+}
 div[data-testid="stMetricDelta"] { color: #30e89b !important; }
 
-/* Divider */
 hr { border-color: #1e2535 !important; margin: 1.5rem 0 !important; }
-
-/* Info/Success/Warning boxes */
 div[data-testid="stAlert"] {
-  border-radius: 12px !important;
-  border: 1px solid #1e2535 !important;
+  border-radius: 14px !important; border: 1px solid #1e2535 !important;
   background: #12161f !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ─── State Init ────────────────────────────────────────────────────────────────
-if "coins" not in st.session_state:
-    st.session_state.coins = 0
-if "ads_watched" not in st.session_state:
-    st.session_state.ads_watched = 0
-if "watching" not in st.session_state:
-    st.session_state.watching = False
-if "cooldown" not in st.session_state:
-    st.session_state.cooldown = False
-if "last_reward" not in st.session_state:
-    st.session_state.last_reward = 0
-if "history" not in st.session_state:
-    st.session_state.history = []
+# ─── Monetag Video Ad HTML Component ──────────────────────────────────────────
+def monetag_video_ad_html() -> str:
+    """
+    Embeds inside st.components.v1.html().
+    - Fires Monetag's interstitial/video ad script on load (real ad pops up)
+    - Shows a branded countdown ring overlay inside the component frame
+    """
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&display=swap');
+  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  body {{
+    background:#090b10;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; font-family:'Rajdhani',sans-serif; overflow:hidden;
+  }}
+  .overlay {{
+    background:linear-gradient(135deg,#12161f 0%,#0e1118 100%);
+    border:2px solid #f5c842; border-radius:20px;
+    padding:28px 22px; text-align:center; width:90%; max-width:360px;
+    animation:pulse 2s ease-in-out infinite;
+  }}
+  @keyframes pulse {{
+    0%,100% {{ box-shadow:0 0 40px rgba(245,200,66,0.15); border-color:#f5c842; }}
+    50%      {{ box-shadow:0 0 80px rgba(245,200,66,0.4);  border-color:#ffe680; }}
+  }}
+  .badge {{
+    display:inline-block; background:rgba(245,200,66,0.12);
+    border:1px solid rgba(245,200,66,0.3); color:#f5c842;
+    font-size:0.62rem; letter-spacing:0.22em; text-transform:uppercase;
+    padding:4px 14px; border-radius:50px; margin-bottom:18px;
+    font-family:'Orbitron',monospace;
+  }}
+  .ring-wrap {{ position:relative; width:110px; height:110px; margin:0 auto 16px; }}
+  .ring-wrap svg {{ transform:rotate(-90deg); }}
+  .ring-bg {{ fill:none; stroke:#1e2535; stroke-width:8; }}
+  .ring-fg {{
+    fill:none; stroke:url(#grad); stroke-width:8; stroke-linecap:round;
+    stroke-dasharray:314.16; stroke-dashoffset:0; transition:stroke-dashoffset 1s linear;
+  }}
+  .ring-inner {{
+    position:absolute; inset:0; display:flex;
+    flex-direction:column; align-items:center; justify-content:center;
+  }}
+  .ring-num {{
+    font-family:'Orbitron',monospace; font-size:1.7rem;
+    font-weight:900; color:#f5c842; line-height:1;
+  }}
+  .ring-s {{ font-size:0.58rem; color:#6b7591; letter-spacing:0.14em; text-transform:uppercase; margin-top:2px; }}
+  .title {{ font-family:'Orbitron',monospace; font-size:0.85rem; font-weight:700; color:#e8eaf0; margin-bottom:5px; }}
+  .sub   {{ font-size:0.78rem; color:#6b7591; margin-bottom:16px; }}
+  .chip  {{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(48,232,155,0.1); border:1px solid rgba(48,232,155,0.25);
+    border-radius:50px; padding:7px 18px;
+    font-family:'Orbitron',monospace; color:#30e89b;
+    font-size:0.8rem; font-weight:700;
+  }}
+  .warn {{ margin-top:13px; font-size:0.68rem; color:#6b7591; }}
+  .warn span {{ color:#ff5c6a; }}
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════╗
+     ║   MONETAG ONCLICK (POPUNDER) — ZONE 10745571   ║
+     ╚══════════════════════════════════════════╝ -->
+<script>(function(s){{s.dataset.zone='10745571',s.src='https://al5sm.com/tag.min.js'}})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+<!-- ═══ Countdown UI ═══ -->
+<div class="overlay">
+  <div class="badge">📺 &nbsp; Monetag Video Ad</div>
+
+  <div class="ring-wrap">
+    <svg width="110" height="110" viewBox="0 0 110 110">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#f5c842"/>
+          <stop offset="100%" stop-color="#30e89b"/>
+        </linearGradient>
+      </defs>
+      <circle class="ring-bg" cx="55" cy="55" r="50"/>
+      <circle class="ring-fg" cx="55" cy="55" r="50" id="ring"/>
+    </svg>
+    <div class="ring-inner">
+      <div class="ring-num" id="cd">30</div>
+      <div class="ring-s">seconds</div>
+    </div>
+  </div>
+
+  <div class="title">Ad is playing above</div>
+  <div class="sub">Watch the full ad to earn coins</div>
+  <div class="chip">🪙 &nbsp; Coins unlock at 0s</div>
+  <p class="warn"><span>⚠</span> Do not close or refresh the tab</p>
+</div>
+
+<script>
+  const TOTAL = 30, CIRC = 2 * Math.PI * 50;
+  const ring = document.getElementById('ring');
+  const cd   = document.getElementById('cd');
+  ring.style.strokeDasharray  = CIRC;
+  ring.style.strokeDashoffset = 0;
+  let left = TOTAL;
+  const t = setInterval(() => {{
+    left--;
+    cd.textContent = left > 0 ? left : '✓';
+    if (left <= 0) {{
+      cd.style.color = '#30e89b';
+      document.querySelector('.sub').textContent = 'Ad complete! Coins being added…';
+      clearInterval(t);
+    }}
+    ring.style.strokeDashoffset = CIRC * (1 - Math.max(left,0) / TOTAL);
+  }}, 1000);
+</script>
+</body>
+</html>"""
 
 
-# ─── Ad content pool ───────────────────────────────────────────────────────────
+# ─── Session State ─────────────────────────────────────────────────────────────
+for k, v in {
+    "coins": 0, "ads_watched": 0, "watching": False,
+    "last_reward": 0, "history": [], "current_ad": None
+}.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
+
+# ─── Ad Pool (all 30s to match Monetag video length) ──────────────────────────
 AD_POOL = [
-    {"title": "🚀 TechPro Max — New Laptop",      "brand": "TechPro",   "reward": random.randint(10, 30), "duration": 10},
-    {"title": "🍔 BurgerKing — Deals App",         "brand": "BurgerKing","reward": random.randint(8,  25), "duration": 8 },
-    {"title": "🎮 GameZone — Play & Win",          "brand": "GameZone",  "reward": random.randint(15, 35), "duration": 12},
-    {"title": "📱 PhoneX Ultra — Flash Sale",      "brand": "PhoneX",    "reward": random.randint(10, 28), "duration": 10},
-    {"title": "👟 SneakPeak — Limited Drop",       "brand": "SneakPeak", "reward": random.randint(12, 30), "duration": 9 },
-    {"title": "☕ CafeBlend — Morning Offer",      "brand": "CafeBlend", "reward": random.randint(5,  20), "duration": 7 },
-    {"title": "✈️ SkyFly — Book & Save 40%",       "brand": "SkyFly",    "reward": random.randint(20, 40), "duration": 15},
-    {"title": "💪 FitPulse — Smart Fitness Band",  "brand": "FitPulse",  "reward": random.randint(10, 25), "duration": 11},
+    {"title": "🚀 TechPro Max — New Laptop",     "brand": "TechPro"},
+    {"title": "🍔 BurgerKing — Deals App",        "brand": "BurgerKing"},
+    {"title": "🎮 GameZone — Play & Win",         "brand": "GameZone"},
+    {"title": "📱 PhoneX Ultra — Flash Sale",     "brand": "PhoneX"},
+    {"title": "👟 SneakPeak — Limited Drop",      "brand": "SneakPeak"},
+    {"title": "✈️  SkyFly — Book & Save 40%",     "brand": "SkyFly"},
+    {"title": "💪 FitPulse — Smart Fitness Band", "brand": "FitPulse"},
+    {"title": "☕ CafeBlend — Morning Offer",     "brand": "CafeBlend"},
 ]
 
-# Pick a random ad for this session if not picked
-if "current_ad" not in st.session_state:
-    st.session_state.current_ad = random.choice(AD_POOL)
+def new_ad():
+    a = random.choice(AD_POOL).copy()
+    a["reward"]   = random.randint(15, 42)
+    a["duration"] = 30
+    return a
 
+if st.session_state.current_ad is None:
+    st.session_state.current_ad = new_ad()
 
-# ─── Header ────────────────────────────────────────────────────────────────────
+ad          = st.session_state.current_ad
+DAILY_LIMIT = 20
+
+# ─── HEADER ────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="text-align:center; padding: 20px 0 10px;">
-  <div style="font-size:60px; margin-bottom:8px; filter: drop-shadow(0 0 20px rgba(245,200,66,0.6));">🪙</div>
-  <div style="font-family:'Orbitron',monospace; font-size:2rem; font-weight:900;
-    background:linear-gradient(135deg,#ffe680,#f5c842,#c99a1a);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
-    EARN COINS
-  </div>
-  <div style="color:#6b7591; letter-spacing:0.3em; font-size:0.8rem; text-transform:uppercase; margin-top:6px;">
-    Watch Ads · Collect Rewards
+<div style="text-align:center;padding:24px 0 10px;">
+  <div style="font-size:64px;line-height:1;margin-bottom:12px;
+    filter:drop-shadow(0 0 24px rgba(245,200,66,0.7));">🪙</div>
+  <div style="font-family:'Orbitron',monospace;font-size:2.2rem;font-weight:900;
+    background:linear-gradient(135deg,#ffe680 0%,#f5c842 50%,#c99a1a 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;letter-spacing:0.1em;">EARN COINS</div>
+  <div style="color:#6b7591;letter-spacing:0.35em;font-size:0.72rem;
+    text-transform:uppercase;margin-top:8px;">
+    Watch Monetag Video Ads · Collect Real Rewards
   </div>
 </div>
 """, unsafe_allow_html=True)
-
 st.markdown("---")
 
-# ─── Balance Row ───────────────────────────────────────────────────────────────
+# ─── METRICS ───────────────────────────────────────────────────────────────────
 c1, c2, c3 = st.columns(3)
 with c1:
-    st.metric("💰 Total Coins", f"{st.session_state.coins:,}", delta=f"+{st.session_state.last_reward}" if st.session_state.last_reward else None)
+    st.metric("💰 Total Coins", f"{st.session_state.coins:,}",
+              delta=f"+{st.session_state.last_reward}" if st.session_state.last_reward else None)
 with c2:
     st.metric("📺 Ads Watched", st.session_state.ads_watched)
 with c3:
-    daily_limit = 20
-    remaining = max(0, daily_limit - st.session_state.ads_watched)
-    st.metric("⏳ Ads Left Today", remaining)
+    st.metric("🎯 Ads Left", max(0, DAILY_LIMIT - st.session_state.ads_watched))
 
 st.markdown("---")
 
-# ─── Current Ad Card ───────────────────────────────────────────────────────────
-ad = st.session_state.current_ad
-
-st.markdown(f"""
-<div style="background:#12161f; border:1px solid #1e2535; border-radius:20px; padding:28px 24px; margin-bottom:20px; text-align:center;">
-  <div style="font-size:0.75rem; color:#6b7591; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">FEATURED AD</div>
-  <div style="font-size:1.4rem; font-weight:700; color:#e8eaf0; margin-bottom:6px;">{ad['title']}</div>
-  <div style="font-size:0.85rem; color:#6b7591; margin-bottom:16px;">by <span style="color:#f5c842">{ad['brand']}</span></div>
-  <div style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">
-    <div style="text-align:center;">
-      <div style="font-family:'Orbitron',monospace; font-size:1.5rem; color:#f5c842; font-weight:700;">+{ad['reward']}</div>
-      <div style="font-size:0.75rem; color:#6b7591; letter-spacing:0.1em;">COINS REWARD</div>
+# ─── AD CARD (only show when not watching) ─────────────────────────────────────
+if not st.session_state.watching:
+    st.markdown(f"""
+    <div style="background:linear-gradient(135deg,#12161f,#0e1118);
+      border:1px solid #1e2535;border-radius:22px;padding:28px 22px;
+      margin-bottom:20px;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+        width:220px;height:220px;border-radius:50%;
+        background:radial-gradient(circle,rgba(245,200,66,0.06),transparent 70%);
+        pointer-events:none;"></div>
+      <div style="font-size:0.68rem;color:#6b7591;letter-spacing:0.25em;
+        text-transform:uppercase;margin-bottom:12px;">▶ &nbsp; Next Monetag Video Ad</div>
+      <div style="font-size:1.3rem;font-weight:700;color:#e8eaf0;margin-bottom:6px;">
+        {ad['title']}</div>
+      <div style="font-size:0.83rem;color:#6b7591;margin-bottom:22px;">
+        by <span style="color:#f5c842;font-weight:600;">{ad['brand']}</span>
+        &nbsp;·&nbsp;
+        <span style="color:#9b6dff;">Monetag Verified ✓</span>
+      </div>
+      <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.55rem;
+            color:#f5c842;font-weight:700;">+{ad['reward']}</div>
+          <div style="font-size:0.68rem;color:#6b7591;letter-spacing:0.12em;
+            text-transform:uppercase;margin-top:2px;">Coins Reward</div>
+        </div>
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.55rem;
+            color:#30e89b;font-weight:700;">30s</div>
+          <div style="font-size:0.68rem;color:#6b7591;letter-spacing:0.12em;
+            text-transform:uppercase;margin-top:2px;">Duration</div>
+        </div>
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.55rem;
+            color:#9b6dff;font-weight:700;">HD</div>
+          <div style="font-size:0.68rem;color:#6b7591;letter-spacing:0.12em;
+            text-transform:uppercase;margin-top:2px;">Quality</div>
+        </div>
+      </div>
     </div>
-    <div style="text-align:center;">
-      <div style="font-family:'Orbitron',monospace; font-size:1.5rem; color:#30e89b; font-weight:700;">{ad['duration']}s</div>
-      <div style="font-size:0.75rem; color:#6b7591; letter-spacing:0.1em;">DURATION</div>
-    </div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-
-# ─── Watch Ad Button + Logic ────────────────────────────────────────────────────
-ads_exhausted = st.session_state.ads_watched >= daily_limit
+# ─── WATCH BUTTON / PLAYING ────────────────────────────────────────────────────
+ads_exhausted = st.session_state.ads_watched >= DAILY_LIMIT
 
 if ads_exhausted:
     st.markdown("""
-    <div style="background:rgba(255,92,106,0.1); border:1px solid #ff5c6a; border-radius:12px;
-      padding:20px; text-align:center; color:#ff5c6a; font-family:'Orbitron',monospace; font-size:0.9rem;">
-      ⚠️ Daily limit reached! Come back tomorrow for more ads.
+    <div style="background:rgba(255,92,106,0.08);border:1px solid rgba(255,92,106,0.4);
+      border-radius:14px;padding:22px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:8px;">🚫</div>
+      <div style="font-family:'Orbitron',monospace;color:#ff5c6a;font-size:0.9rem;
+        font-weight:700;letter-spacing:0.08em;">Daily Limit Reached</div>
+      <div style="color:#6b7591;font-size:0.85rem;margin-top:6px;">
+        Come back tomorrow for 20 more Monetag ads!</div>
     </div>
     """, unsafe_allow_html=True)
 
 elif not st.session_state.watching:
-    if st.button("▶  Watch Ad & Earn Coins"):
-        st.session_state.watching = True
-        st.rerun()
+    _, mid, _ = st.columns([1, 2, 1])
+    with mid:
+        if st.button("▶  Watch Video Ad & Earn Coins"):
+            st.session_state.watching = True
+            st.rerun()
 
 else:
-    # ── Ad is playing ──
-    ad_placeholder = st.empty()
-    progress_bar = st.progress(0)
+    # ══════════════════════════════════════════════════
+    #  MONETAG VIDEO AD PLAYING
+    # ══════════════════════════════════════════════════
 
-    with ad_placeholder.container():
-        st.markdown(f"""
-        <div style="background:linear-gradient(135deg,#12161f,#0e1118);
-            border:2px solid #f5c842; border-radius:20px;
-            padding:40px 24px; text-align:center;
-            box-shadow: 0 0 40px rgba(245,200,66,0.15);">
-          <div style="font-size:3rem; margin-bottom:12px; animation:pulse 1s infinite;">📺</div>
-          <div style="font-family:'Orbitron',monospace; color:#f5c842; font-size:1rem; font-weight:700; margin-bottom:8px;">
-            AD PLAYING
-          </div>
-          <div style="color:#e8eaf0; font-size:1.1rem; font-weight:600; margin-bottom:4px;">{ad['title']}</div>
-          <div style="color:#6b7591; font-size:0.85rem;">Do not close this page during the ad</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    duration = ad["duration"]
-    for i in range(duration + 1):
-        progress_bar.progress(i / duration, text=f"⏱️ {duration - i}s remaining...")
-        time.sleep(1)
-
-    # ── Reward ──
-    reward = ad["reward"]
-    st.session_state.coins += reward
-    st.session_state.ads_watched += 1
-    st.session_state.last_reward = reward
-    st.session_state.watching = False
-    st.session_state.history.append({
-        "ad": ad["title"],
-        "reward": reward,
-        "total": st.session_state.coins
-    })
-    # Pick new ad
-    st.session_state.current_ad = random.choice(AD_POOL)
-    st.session_state.current_ad["reward"] = random.randint(8, 40)
-
-    ad_placeholder.empty()
-    progress_bar.empty()
-    st.rerun()
-
-
-# ─── Success banner after watching ────────────────────────────────────────────
-if st.session_state.last_reward and not st.session_state.watching:
-    st.success(f"🎉 +{st.session_state.last_reward} Coins earned! Keep watching to earn more.")
-
-
-st.markdown("---")
-
-# ─── History Table ─────────────────────────────────────────────────────────────
-if st.session_state.history:
     st.markdown("""
-    <div style="font-family:'Orbitron',monospace; font-size:0.85rem; color:#6b7591;
-      letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">
-      📋 Earnings History
+    <div style="text-align:center;margin-bottom:8px;">
+      <span style="font-family:'Orbitron',monospace;font-size:0.72rem;
+        color:#f5c842;letter-spacing:0.2em;text-transform:uppercase;">
+        🔴 &nbsp; Monetag Video Ad Loading…
+      </span>
     </div>
     """, unsafe_allow_html=True)
 
-    for entry in reversed(st.session_state.history[-8:]):
-        st.markdown(f"""
-        <div style="background:#12161f; border:1px solid #1e2535; border-radius:12px;
-          padding:12px 18px; margin-bottom:8px; display:flex; justify-content:space-between;
-          align-items:center; flex-wrap:wrap; gap:8px;">
-          <span style="color:#e8eaf0; font-size:0.9rem;">{entry['ad']}</span>
-          <span style="color:#30e89b; font-family:'Orbitron',monospace; font-size:0.85rem; font-weight:700;">
-            +{entry['reward']} 🪙
+    # Fire the real Monetag video interstitial + show countdown ring
+    components.html(
+        monetag_video_ad_html(),
+        height=330,
+        scrolling=False,
+    )
+
+    # Python-side progress bar (mirrors the 30s JS countdown)
+    st.markdown("""
+    <div style="margin-top:12px;margin-bottom:4px;text-align:center;
+      font-size:0.7rem;color:#6b7591;letter-spacing:0.14em;text-transform:uppercase;">
+      Server-side verification timer
+    </div>
+    """, unsafe_allow_html=True)
+
+    bar    = st.progress(0)
+    slot   = st.empty()
+    SECS   = 30
+
+    for i in range(SECS + 1):
+        left = SECS - i
+        bar.progress(i / SECS, text=f"⏳  {left}s remaining")
+        slot.markdown(f"""
+        <div style="text-align:center;padding:6px 0;">
+          <span style="font-family:'Orbitron',monospace;font-size:0.95rem;
+            color:#{'30e89b' if left == 0 else 'f5c842'};font-weight:700;">
+            {'✓  Ad Complete!' if left == 0 else f'{left}s'}
           </span>
+          {"" if left == 0 else
+           f'<span style="color:#6b7591;font-size:0.78rem;margin-left:8px;">until coins arrive</span>'}
+        </div>
+        """, unsafe_allow_html=True)
+        time.sleep(1)
+
+    # ── Award coins ──────────────────────────────────
+    reward = ad["reward"]
+    st.session_state.coins       += reward
+    st.session_state.ads_watched += 1
+    st.session_state.last_reward  = reward
+    st.session_state.watching     = False
+    st.session_state.history.append({
+        "ad": ad["title"], "brand": ad["brand"],
+        "reward": reward,  "total": st.session_state.coins
+    })
+    st.session_state.current_ad = new_ad()
+
+    bar.empty()
+    slot.empty()
+    st.rerun()
+
+# ─── SUCCESS BANNER ────────────────────────────────────────────────────────────
+if st.session_state.last_reward and not st.session_state.watching:
+    st.markdown(f"""
+    <div style="background:linear-gradient(135deg,rgba(48,232,155,0.08),rgba(245,200,66,0.06));
+      border:1px solid rgba(48,232,155,0.3);border-radius:14px;
+      padding:16px 22px;text-align:center;margin-top:8px;">
+      <span style="font-size:1.3rem;">🎉</span>
+      <span style="font-family:'Orbitron',monospace;color:#30e89b;
+        font-size:0.92rem;font-weight:700;margin:0 10px;">
+        +{st.session_state.last_reward} COINS ADDED
+      </span>
+      <span style="color:#6b7591;font-size:0.83rem;">Keep watching to earn more!</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ─── EARNINGS HISTORY ──────────────────────────────────────────────────────────
+if st.session_state.history:
+    st.markdown("""
+    <div style="font-family:'Orbitron',monospace;font-size:0.76rem;color:#6b7591;
+      letter-spacing:0.18em;text-transform:uppercase;margin-bottom:14px;">
+      📋 &nbsp; Earnings History
+    </div>
+    """, unsafe_allow_html=True)
+
+    for i, e in enumerate(reversed(st.session_state.history[-10:])):
+        op = max(0.38, 1.0 - i * 0.07)
+        st.markdown(f"""
+        <div style="background:#12161f;border:1px solid #1e2535;border-radius:12px;
+          padding:12px 18px;margin-bottom:8px;
+          display:flex;justify-content:space-between;align-items:center;
+          flex-wrap:wrap;gap:8px;opacity:{op:.2f};">
+          <div>
+            <div style="color:#e8eaf0;font-size:0.88rem;font-weight:600;">{e['ad']}</div>
+            <div style="color:#6b7591;font-size:0.73rem;margin-top:2px;">
+              via <span style="color:#f5c842;">{e['brand']}</span>
+              &nbsp;·&nbsp; Wallet: {e['total']:,} 🪙
+            </div>
+          </div>
+          <div style="font-family:'Orbitron',monospace;color:#30e89b;
+            font-size:0.88rem;font-weight:700;white-space:nowrap;">
+            +{e['reward']} 🪙
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
-# ─── Back to Lobby ─────────────────────────────────────────────────────────────
+# ─── FOOTER ────────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("""
-<div style="text-align:center;">
+<div style="text-align:center;padding-bottom:24px;">
   <a href="https://bodare207-ai.github.io/index.html/" target="_blank"
-    style="display:inline-block; padding:12px 32px; border-radius:50px;
-    border:1px solid #1e2535; color:#6b7591; text-decoration:none;
-    font-family:'Rajdhani',sans-serif; font-size:0.9rem; letter-spacing:0.1em;
-    text-transform:uppercase; transition:all 0.2s;">
-    ← Back to Lobby
+    style="display:inline-block;padding:12px 36px;border-radius:50px;
+    border:1px solid #1e2535;color:#6b7591;text-decoration:none;
+    font-family:'Rajdhani',sans-serif;font-size:0.9rem;font-weight:600;
+    letter-spacing:0.12em;text-transform:uppercase;">
+    ← Back to CoinVault Lobby
   </a>
-</div>
-<div style="text-align:center; margin-top:20px; color:#1e2535; font-size:0.7rem; letter-spacing:0.15em;">
-  COINVAULT © 2025
+  <div style="color:#1e2535;font-size:0.66rem;letter-spacing:0.18em;margin-top:12px;">
+    COINVAULT © 2025 &nbsp;·&nbsp; POWERED BY MONETAG
+  </div>
 </div>
 """, unsafe_allow_html=True)
